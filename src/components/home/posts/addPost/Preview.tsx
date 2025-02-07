@@ -62,7 +62,7 @@ const AllPreview = ({
   setPreview: (data: Partial<PreviewState["preview"]>) => void;
 }) => {
   return (
-    <Carousel className="max-w-md rounded-md" opts={{ loop: true }}>
+    <Carousel className="rounded-md" opts={{ loop: true }}>
       <CarouselContent>
         {preview.items.map((item: PreviewItem, index: number) => (
           <CarouselItem
@@ -109,16 +109,22 @@ const Preview = () => {
   const hasContent = preview.text || preview.items.length > 0;
   return (
     <div className="mx-auto grid w-[95%] place-content-center space-y-2 overflow-hidden lg:mx-0 lg:w-full">
-      <div className={cn(hasContent ? "rounded-md border p-2" : "hidden")}>
+      <div
+        className={cn(
+          hasContent
+            ? "max-h-96 overflow-y-auto rounded-md border p-2"
+            : "hidden",
+        )}
+      >
         {preview.text && <p className="mb-2">{preview.text}</p>}
 
-        <div className="media-container grid place-content-center">
+        <div>
           {preview.items.length > 1 && (
             <AllPreview preview={preview} setPreview={setPreview} />
           )}
           {Boolean(isVideo.length === 1 && !isImage.length) ||
           Boolean(isImage.length === 1 && !isVideo.length) ? (
-            <Card className="relative h-full">
+            <Card className="relative">
               <CardContent className={cardClasses}>
                 <RemoveMedia
                   type={
