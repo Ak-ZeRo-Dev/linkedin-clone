@@ -1,6 +1,6 @@
 # LinkedIn Clone
 
-**[Demo](demo_url)**  
+**[https://linkedinclone-akzero.vercel.app](https://linkedinclone-akzero.vercel.app/)**  
 A modern LinkedIn clone built with Next.js, React, and TailwindCSS.
 
 ---
