@@ -1,9 +1,11 @@
+import { cn } from "@/lib/utils";
+import { useEditStore } from "@/store/postStore";
 import { usePreviewStore } from "@/store/previewStore";
 import { XIcon, YoutubeIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import * as z from "zod";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 import {
   Dialog,
   DialogClose,
@@ -12,32 +14,60 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../ui/dialog";
-import { Input } from "../ui/input";
-import { cn } from "@/lib/utils";
-import { randomBytes } from "crypto";
+} from "../../ui/dialog";
+import { Input } from "../../ui/input";
 
-const AddVideo = () => {
+const PostVideo = ({ type = "add" }: { type?: "add" | "edit" }) => {
   const { addItem, preview } = usePreviewStore();
-  const [url, setUrl] = useState<string>("");
+  const { data, addItem: PostVideo, setData } = useEditStore();
+  const isAddType = type === "edit" ? data : preview;
+  const video = isAddType.items?.find((item) => item.type === "video");
+
+  const [url, setUrl] = useState<string>(video?.url || "");
   const closeRef = useRef<any>(null);
 
   const urlSchema = z.string().url().safeParse(url);
 
-  const handleAddVideo = () => {
+  const handlePostVideo = () => {
     if (url && urlSchema.success) {
-      addItem({ type: "video", url, id: randomBytes(5).toString("hex") });
+      if (type === "edit") {
+        if (data.items?.find((item) => item.type === "video")) {
+          setData({
+            ...data,
+            items: data.items.map((item) => {
+              if (item.type === "video") {
+                return { ...item, url };
+              }
+              return item;
+            }),
+          });
+        } else {
+          PostVideo({
+            type: "video",
+            url,
+            order: (data.items ?? []).length + 1,
+          });
+        }
+      } else {
+        addItem({
+          type: "video",
+          url,
+          order: preview.items.length + 1,
+        });
+      }
+
       closeRef.current?.click();
     } else {
       toast.error("Invalid URL");
     }
   };
 
-  useEffect(() => {
-    setUrl(preview.items.find((item) => item.type === "video")?.url || "");
-  }, [preview.items]);
+  const handleOpen = () => {
+    setUrl(video?.url || "");
+  };
+
   return (
-    <Dialog>
+    <Dialog onOpenChange={handleOpen}>
       <DialogTrigger asChild>
         <Button
           type="button"
@@ -80,7 +110,7 @@ const AddVideo = () => {
             type="button"
             size="sm"
             disabled={!url}
-            onClick={handleAddVideo}
+            onClick={handlePostVideo}
           >
             {url ? "Update" : "Add"}
           </Button>
@@ -89,4 +119,4 @@ const AddVideo = () => {
     </Dialog>
   );
 };
-export default AddVideo;
+export default PostVideo;

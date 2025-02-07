@@ -1,27 +1,21 @@
 "use client";
-import { PreviewItem, usePreviewStore } from "@/store/previewStore";
+import { IEditMedia, useEditStore } from "@/store/postStore";
+import { usePreviewStore } from "@/store/previewStore";
+import { PreviewItem } from "@/types/post";
 import { randomBytes } from "crypto";
 import { ImageIcon, Trash2Icon } from "lucide-react";
 import Image from "next/image";
-import {
-  ChangeEvent,
-  Dispatch,
-  DragEvent,
-  SetStateAction,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { ChangeEvent, DragEvent, useRef, useState } from "react";
 import { toast } from "sonner";
-import { Button } from "../ui/button";
-import { Card, CardContent } from "../ui/card";
+import { Button } from "../../ui/button";
+import { Card, CardContent } from "../../ui/card";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "../ui/carousel";
+} from "../../ui/carousel";
 import {
   Dialog,
   DialogClose,
@@ -29,39 +23,18 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../ui/dialog";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
+} from "../../ui/dialog";
+import { Input } from "../../ui/input";
+import { Label } from "../../ui/label";
 
-const RemoveMedia = ({
-  setImages,
-  index = 0,
-}: {
-  setImages: Dispatch<SetStateAction<PreviewItem[]>>;
-  index?: number;
-}) => {
-  const handleDelete = () => {
-    setImages((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  return (
-    <Button
-      variant="ghost"
-      size="icon"
-      className="absolute right-1 top-1 h-4 w-4 transition-colors hover:text-[#0a66c4]"
-      onClick={handleDelete}
-    >
-      <Trash2Icon />
-    </Button>
-  );
-};
-
-const AddImages = () => {
+const PostImages = ({ type = "add" }: { type?: "add" | "edit" }) => {
   const { preview } = usePreviewStore();
+  const { data } = useEditStore();
   const [isDragActive, setIsDragActive] = useState(false);
-  const [images, setImages] = useState<PreviewItem[]>([]);
+  const [images, setImages] = useState<PreviewItem[] | IEditMedia[]>([]);
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const closeRef = useRef<any>(null);
+  const isAddType = type === "add";
 
   // Handle drag and drop
   const handleDragOver = (event: DragEvent<HTMLLabelElement>) => {
@@ -116,13 +89,13 @@ const AddImages = () => {
   const handleImageUpload = (files: FileList | null) => {
     if (files) {
       setImages((prev) => {
-        const startOrder = prev.length + 1; // Start order from the current array length
+        const startOrder = prev.length + 1;
         const imageUrls: PreviewItem[] = [...files].map((file, index) => ({
           type: "image",
           url: URL.createObjectURL(file),
-          id: randomBytes(5).toString("hex"),
+          _id: randomBytes(16).toString("hex"),
           file,
-          order: startOrder + index, // Assign incremental order
+          order: startOrder + index,
         }));
 
         return [...prev, ...imageUrls];
@@ -135,35 +108,82 @@ const AddImages = () => {
   const handleSave = () => {
     const reorderedImages = images.map((image, index) => ({
       ...image,
-      order: index + 1, // Update order based on the new position
+      order: index + 1,
     }));
 
-    usePreviewStore.setState((state) => ({
-      preview: {
-        ...state.preview,
-        items: [
-          ...state.preview.items.filter((item) => item.type !== "image"), // Retain non-image items
-          ...reorderedImages, // Save reordered images
-        ],
-      },
-    }));
+    if (isAddType) {
+      usePreviewStore.setState((state) => ({
+        preview: {
+          ...state.preview,
+          items: [
+            ...state.preview.items.filter((item) => item.type !== "image"),
+            ...reorderedImages,
+          ],
+        },
+      }));
+    } else {
+      useEditStore.setState((state) => ({
+        data: {
+          ...state.data,
+          items: [
+            ...(state.data.items?.filter((item) => item.type !== "image") ??
+              []),
+            ...reorderedImages,
+          ],
+        },
+      }));
+    }
 
-    toast.success("Image order updated successfully!");
     closeRef.current.click();
   };
 
-  useEffect(() => {
-    const images = preview.items.filter((item) => item.type === "image");
-    setImages(images);
-  }, [preview]);
+  const handleOpen = () => {
+    setImages(
+      (isAddType ? preview : data)?.items?.filter(
+        (item) => item.type === "image",
+      ) || [],
+    );
+  };
+
+  const RemoveBtn = ({
+    index = 0,
+    id,
+  }: {
+    index?: number;
+    id?: string | null;
+  }) => {
+    const handleDelete = (id: string | null) => {
+      setImages((prev) =>
+        prev.filter((ele, i) => {
+          if (id) {
+            return ele._id !== id;
+          } else {
+            return i !== index;
+          }
+        }),
+      );
+    };
+    return (
+      <Button
+        variant="ghost"
+        size="icon"
+        className="absolute right-1 top-1 h-4 w-4 transition-colors hover:text-[#0a66c4]"
+        onClick={() => handleDelete(id || null)}
+      >
+        <Trash2Icon />
+      </Button>
+    );
+  };
 
   return (
     <div>
-      <Dialog>
-        <DialogTrigger className="flex-center w-fit gap-1">
-          <ImageIcon className="h-4 w-4" />
-          <span className="sr-only">Add image</span>
-          <span className="text-xs">Add image</span>
+      <Dialog onOpenChange={handleOpen}>
+        <DialogTrigger className="flex-center w-fit gap-1" asChild>
+          <Button variant="ghost" type="button" size="sm">
+            <ImageIcon className="h-4 w-4" />
+            <span className="sr-only">Add image</span>
+            <span className="text-xs">Add image</span>
+          </Button>
         </DialogTrigger>
         <DialogContent>
           <DialogHeader>
@@ -199,6 +219,7 @@ const AddImages = () => {
               accept="image/*"
               name="images"
               multiple
+              max={5}
               id="image"
               className="hidden"
               hidden
@@ -216,9 +237,9 @@ const AddImages = () => {
                   }}
                 >
                   <CarouselContent className="-ml-1">
-                    {images.map(({ url, type }, index) => (
+                    {images.map((image, index) => (
                       <CarouselItem
-                        key={`${type}-${index}`}
+                        key={`${image.type}-${index}`}
                         draggable
                         onDragStart={() => handleDragStart(index)}
                         onDragOver={() => handleDragOverItem(index)}
@@ -227,10 +248,10 @@ const AddImages = () => {
                       >
                         <Card className="relative w-48 overflow-hidden rounded-md border border-muted shadow-md">
                           <CardContent className="relative aspect-square p-0">
-                            <RemoveMedia setImages={setImages} index={index} />
+                            <RemoveBtn index={index} id={image._id || null} />
                             <Image
-                              src={url}
-                              alt={`${type}-${index}`}
+                              src={image.url}
+                              alt={`${image.type}-${index}`}
                               width={100}
                               height={100}
                               className="h-full w-full object-cover"
@@ -250,7 +271,7 @@ const AddImages = () => {
               <div className="mt-2 flex w-full justify-center">
                 <Card className="relative h-32 w-48 overflow-hidden rounded-md border border-muted shadow-md">
                   <CardContent className="relative aspect-square p-0">
-                    <RemoveMedia setImages={setImages} />
+                    <RemoveBtn id={images[0]._id || null} />
                     <Image
                       src={images[0].url}
                       alt="image-1"
@@ -269,7 +290,11 @@ const AddImages = () => {
                 size="sm"
                 variant="default"
                 onClick={() => handleSave()}
-                disabled={!images.length}
+                disabled={
+                  images.length ===
+                  (data.items?.filter((item) => item.type === "image")
+                    ?.length || 0)
+                }
               >
                 Save
               </Button>
@@ -281,4 +306,4 @@ const AddImages = () => {
   );
 };
 
-export default AddImages;
+export default PostImages;

@@ -1,22 +1,29 @@
+import { IPostSchema } from "@/types/post";
 import * as z from "zod";
 
-export const postSchema = z
+export const postSchema: z.ZodType<IPostSchema> = z
   .object({
     text: z.string().optional(),
-    items: z
+    images: z
       .array(
         z.object({
-          type: z.enum(["image", "video"]),
-          url: z.string(),
-          id: z.string().optional(),
-          file: z.instanceof(File).optional(),
-          order: z.number().optional(),
+          file: z.instanceof(File),
+          order: z.number(),
         }),
       )
       .optional(),
+    video: z
+      .object({
+        url: z.string(),
+        order: z.number(),
+      })
+      .optional(),
   })
   .refine(
-    (data) => data.text?.trim() || (data.items && data.items.length > 0),
+    (data) =>
+      data.text?.trim() ||
+      (data.images && data.images.length > 0) ||
+      data.video,
     {
       message: "At least one field (text, images, or videos) must be provided.",
     },

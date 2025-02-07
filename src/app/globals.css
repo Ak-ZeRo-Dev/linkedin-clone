@@ -80,16 +80,16 @@
     @apply flex flex-col items-center justify-center text-sm font-light;
   }
   .icon svg {
-    @apply fill-transparent stroke-gray-300;
+    @apply fill-transparent stroke-muted-foreground;
   }
   .icon p {
-    @apply text-xs text-gray-400;
+    @apply text-xs text-foreground;
   }
   .input-reset {
     @apply !outline-none !ring-0 !ring-offset-0 focus:!outline-none focus:!ring-0 focus:!ring-offset-0;
   }
 
   .media-container {
-    @apply max-w-md rounded-lg;
+    @apply h-full w-full;
   }
 }

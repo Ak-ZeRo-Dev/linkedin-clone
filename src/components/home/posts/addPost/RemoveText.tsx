@@ -1,6 +1,6 @@
 import { usePreviewStore } from "@/store/previewStore";
 import { XIcon } from "lucide-react";
-import { Button } from "../ui/button";
+import { Button } from "../../../ui/button";
 
 const RemoveText = () => {
   const { setPreview } = usePreviewStore();

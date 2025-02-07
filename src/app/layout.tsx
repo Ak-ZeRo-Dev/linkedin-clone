@@ -7,7 +7,30 @@ import { ThemeProvider } from "@/components/themeProvider";
 
 export const metadata: Metadata = {
   title: "LinkedIn Clone",
-  description: "",
+  description: "LinkedIn Clone by Ak-ZeRo",
+  openGraph: {
+    images: "/logo.png",
+  },
+  appleWebApp: {
+    capable: true,
+    title: "LinkedIn Clone",
+    statusBarStyle: "default",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "LinkedIn Clone",
+    description: "LinkedIn Clone by Ak-ZeRo",
+    images: "/logo.png",
+  },
+  keywords: [
+    "LinkedIn",
+    "Clone",
+    "LinkedIn Clone",
+    "LinkedIn Clone by Ak-ZeRo",
+  ],
+  authors: [{ name: "Ak-ZeRo", url: "https://github.com/Ak-ZeRo-Dev" }],
+  creator: "Ak-ZeRo",
+  publisher: "Ak-ZeRo",
 };
 
 export default function RootLayout({
@@ -18,7 +41,7 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className="flex min-h-screen flex-col transition-all">
+        <body className="flex min-h-screen flex-col overflow-x-hidden transition-all">
           <ThemeProvider
             attribute="class"
             defaultTheme="system"
@@ -39,6 +62,7 @@ export default function RootLayout({
                   error: "text-destructive",
                   info: "text-blue-500",
                   warning: "text-yellow-500",
+                  default: "text-foreground",
                 },
               }}
             />

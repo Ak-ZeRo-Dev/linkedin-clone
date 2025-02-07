@@ -7,15 +7,13 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
-import { PreviewItem, usePreviewStore } from "@/store/previewStore";
-import { IPreview } from "@/types/types";
+import { PreviewState, usePreviewStore } from "@/store/previewStore";
+import { PreviewItem } from "@/types/post";
 import { Trash2Icon } from "lucide-react";
 import Image from "next/image";
-import { Button } from "../ui/button";
-import AddImages from "./AddImages";
-import AddText from "./AddText";
-import AddVideo from "./AddVideo";
-import RemoveText from "./RemoveText";
+import { Button } from "../../../ui/button";
+import UserActions from "./UserActions";
+import VideoPlayer from "@/components/VideoPlayer";
 
 const cardClasses = "relative m-0 h-60 w-full p-0";
 
@@ -27,7 +25,7 @@ const RemoveMedia = ({
   removeClass = "",
 }: {
   type: "image" | "video";
-  setPreview: (data: Partial<IPreview>) => void;
+  setPreview: (data: Partial<PreviewState["preview"]>) => void;
   items?: PreviewItem[];
   index?: number;
   removeClass?: string;
@@ -56,63 +54,17 @@ const RemoveMedia = ({
   );
 };
 
-const VideoPlayer = ({ url }: { url: string }) => {
-  let embedUrl = url;
-  let title = "Preview video";
-
-  try {
-    const parsedUrl = new URL(url);
-
-    if (url.includes("youtube.com") || url.includes("youtu.be")) {
-      const videoId =
-        parsedUrl.searchParams.get("v") || parsedUrl.pathname.split("/").pop();
-      embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0`;
-      title = "YouTube video player";
-    } else if (url.includes("vimeo.com")) {
-      const videoId = parsedUrl.pathname.split("/").pop();
-      embedUrl = `https://player.vimeo.com/video/${videoId}?autoplay=1`;
-      title = "Vimeo video player";
-    } else if (url.includes("drive.google.com")) {
-      // Extract the file ID from the Google Drive URL
-      const fileId = parsedUrl.pathname.includes("/file/d/")
-        ? parsedUrl.pathname.split("/file/d/")[1]?.split("/")[0]
-        : parsedUrl.searchParams.get("id");
-      if (fileId) {
-        embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
-        title = "Google Drive video player";
-      }
-    }
-  } catch (error) {
-    console.error("Invalid URL:", error);
-  }
-
-  return (
-    <div className="media-container">
-      <iframe
-        src={embedUrl}
-        title={title}
-        frameBorder="0"
-        allow="encrypted-media; picture-in-picture"
-        referrerPolicy="strict-origin-when-cross-origin"
-        allowFullScreen
-        loading="lazy"
-        className="h-[240px] w-[446.55px] object-cover"
-      ></iframe>
-    </div>
-  );
-};
-
 const AllPreview = ({
   preview,
   setPreview,
 }: {
-  preview: IPreview;
-  setPreview: (data: Partial<IPreview>) => void;
+  preview: PreviewState["preview"];
+  setPreview: (data: Partial<PreviewState["preview"]>) => void;
 }) => {
   return (
     <Carousel className="max-w-md rounded-md" opts={{ loop: true }}>
       <CarouselContent>
-        {preview.items.map((item, index) => (
+        {preview.items.map((item: PreviewItem, index: number) => (
           <CarouselItem
             key={`${item.type}-${index}`}
             className="overflow-hidden rounded-md"
@@ -194,12 +146,7 @@ const Preview = () => {
       </div>
       {hasContent && <hr />}
 
-      <div className="my-1 flex w-full flex-wrap items-center justify-center">
-        <AddImages />
-        <AddVideo />
-        <AddText />
-        {preview.text && <RemoveText />}
-      </div>
+      <UserActions />
     </div>
   );
 };

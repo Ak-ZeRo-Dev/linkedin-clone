@@ -1,10 +1,12 @@
 "use client";
 
+import { useEditStore } from "@/store/postStore";
 import { usePreviewStore } from "@/store/previewStore";
-import { ReactElement, useEffect, useState } from "react";
+import { TextIcon } from "lucide-react";
+import { ReactElement, useState } from "react";
 import { toast } from "sonner";
 import * as z from "zod";
-import { Button } from "../ui/button";
+import { Button } from "../../ui/button";
 import {
   Dialog,
   DialogClose,
@@ -13,39 +15,50 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "../ui/dialog";
-import { Textarea } from "../ui/textarea";
+} from "../../ui/dialog";
+import { Textarea } from "../../ui/textarea";
 
-const AddText = ({
+const PostText = ({
   trigger,
   title,
+  type = "add",
 }: {
   trigger?: ReactElement;
   title?: string;
+  type?: "add" | "edit";
 }) => {
   const { preview, setPreview } = usePreviewStore();
-  const [currentText, setCurrentText] = useState<string>(preview.text || "");
+  const { data, setData } = useEditStore();
+  const isAddType = type === "add" ? preview : data;
+  const text = isAddType.text || "";
+
+  const [currentText, setCurrentText] = useState<string>(text);
 
   const updateText = () => {
     const textSchema = z.string().safeParse(currentText);
     if (textSchema.success) {
-      setPreview({ text: currentText });
+      if (type === "edit") {
+        setData({ text: currentText });
+      } else {
+        setPreview({ text: currentText });
+      }
     } else {
       toast.error("Invalid text");
     }
   };
 
-  useEffect(() => {
-    setCurrentText(preview.text || "");
-  }, [preview.text]);
+  const handleOpen = () => {
+    setCurrentText(text);
+  };
 
   return (
-    <Dialog>
+    <Dialog onOpenChange={handleOpen}>
       <DialogTrigger asChild>
         {trigger ? (
           trigger
         ) : (
-          <Button variant="ghost" size="sm">
+          <Button variant="ghost" size="sm" className="flex items-center gap-1">
+            <TextIcon className="w-4" />
             {currentText ? "Update" : "Add"} Text
           </Button>
         )}
@@ -59,6 +72,7 @@ const AddText = ({
         <Textarea
           rows={5}
           value={currentText}
+          name="text"
           onChange={(e) => setCurrentText(e.target.value)}
         />
         <DialogFooter>
@@ -73,4 +87,4 @@ const AddText = ({
   );
 };
 
-export default AddText;
+export default PostText;
