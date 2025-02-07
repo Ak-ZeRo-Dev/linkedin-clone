@@ -91,10 +91,15 @@ const PostForm = () => {
           form.append(`image-[${image.order}]`, image.file),
         );
 
-        await fetch("/api/posts", {
+        const res = await fetch("/api/posts", {
           method: "POST",
           body: form,
         });
+
+        if (!res.ok) {
+          throw new Error("Something went wrong");
+        }
+
         resetPreview();
         router.refresh();
         toast.success("Post added successfully!", { id: toastId });

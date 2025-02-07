@@ -1,7 +1,7 @@
 import { connectDB } from "@/db/db";
 import { Post } from "@/db/models/post";
 import { PreviewItem } from "@/types/post";
-import { uploadToCloudinary } from "@/utils/uploadToCloudinary";
+import { uploadWithRetry } from "@/utils/uploadToCloudinary";
 import { currentUser } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
@@ -30,18 +30,16 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    let uploadedImages: any[] = [];
+    const uploadedImages: any[] = [];
     if (images.length > 0) {
-      uploadedImages = await Promise.all(
-        images.map(async (image, index: number) => {
-          const result = await uploadToCloudinary(image.file as File);
-          return {
-            public_id: result.public_id,
-            url: result.secure_url,
-            order: image.order || index,
-          };
-        }),
-      );
+      for (const image of images) {
+        const result = await uploadWithRetry(image.file as File);
+        uploadedImages.push({
+          public_id: result.public_id,
+          url: result.secure_url,
+          order: image.order,
+        });
+      }
     }
 
     // Construct post data
