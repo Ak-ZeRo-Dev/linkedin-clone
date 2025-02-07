@@ -12,7 +12,7 @@ A modern LinkedIn clone built with Next.js, React, and TailwindCSS.
 - **Real-time Updates**
 - **Interactive UI with Framer Motion**
 - **Database Integration with MongoDB**
-- **File Uploads using Multer & Cloudinary**
+- **File Uploads using Cloudinary**
 - **State Management with Zustand**
 
 ---
