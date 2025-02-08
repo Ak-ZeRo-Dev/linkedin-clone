@@ -4,6 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "sonner";
 import Header from "@/components/header/Header";
 import { ThemeProvider } from "@/components/themeProvider";
+import GoToTop from "@/components/GoToTop";
 
 export const metadata: Metadata = {
   title: "LinkedIn Clone",
@@ -50,9 +51,13 @@ export default function RootLayout({
           >
             <Header />
             <div className="w-full flex-1 bg-[#f4f2ed] dark:bg-gray-900">
-              <main className="container-center">{children}</main>
+              <main className="container-center">
+                {children}
+                <GoToTop />
+              </main>
             </div>
             <Toaster
+              position="bottom-left"
               toastOptions={{
                 className: "border-none bg-background select-none",
                 // closeButton: true,
