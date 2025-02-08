@@ -77,9 +77,7 @@ const PostText = ({
         />
         <DialogFooter>
           <DialogClose asChild>
-            <Button onClick={updateText} disabled={!currentText}>
-              Save
-            </Button>
+            <Button onClick={updateText}>Save</Button>
           </DialogClose>
         </DialogFooter>
       </DialogContent>
