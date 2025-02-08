@@ -15,7 +15,7 @@ import {
 } from "../../../ui/dialog";
 import RemoveMedia from "./RemoveMedia";
 
-const EditMedia = ({ type = "add" }: { type?: "add" | "edit" }) => {
+const EditMedia = () => {
   const { data, setData } = useEditStore();
 
   const [items, setItems] = useState(data.items);
