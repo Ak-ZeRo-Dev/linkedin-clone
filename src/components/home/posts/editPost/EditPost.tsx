@@ -122,7 +122,7 @@ const EditPost = ({ post }: { post: IPostDocument }) => {
             <PostText type="edit" />
             <PostImages type="edit" />
             <PostVideo type="edit" />
-            {data.items?.length && <EditMedia />}
+            {data.items?.length ? <EditMedia /> : null}
 
             <Button
               type="submit"
