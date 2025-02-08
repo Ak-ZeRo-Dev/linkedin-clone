@@ -18,6 +18,7 @@ import PostText from "../PostText";
 import PostVideo from "../PostVideo";
 import EditMedia from "./EditMedia";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 const EditPost = ({ post }: { post: IPostDocument }) => {
   const { text, images, video } = post;
@@ -119,10 +120,12 @@ const EditPost = ({ post }: { post: IPostDocument }) => {
         </DialogHeader>
         <div>
           <form action={handleSubmit}>
-            <PostText type="edit" />
-            <PostImages type="edit" />
-            <PostVideo type="edit" />
-            {data.items?.length ? <EditMedia /> : null}
+            <div className={cn(isPending && "pointer-events-none opacity-80")}>
+              <PostText type="edit" />
+              <PostImages type="edit" />
+              <PostVideo type="edit" />
+              {data.items?.length ? <EditMedia /> : null}
+            </div>
 
             <Button
               type="submit"
