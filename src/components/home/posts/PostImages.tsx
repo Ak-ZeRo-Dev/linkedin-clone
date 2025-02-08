@@ -292,8 +292,9 @@ const PostImages = ({ type = "add" }: { type?: "add" | "edit" }) => {
                 onClick={() => handleSave()}
                 disabled={
                   images.length ===
-                  (data.items?.filter((item) => item.type === "image")
-                    ?.length || 0)
+                  ((isAddType ? preview : data).items?.filter(
+                    (item) => item.type === "image",
+                  )?.length || 0)
                 }
               >
                 Save

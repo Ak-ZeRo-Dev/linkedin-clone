@@ -106,12 +106,7 @@ const PostVideo = ({ type = "add" }: { type?: "add" | "edit" }) => {
         </div>
         <DialogFooter>
           <DialogClose ref={closeRef} className="hidden" hidden></DialogClose>
-          <Button
-            type="button"
-            size="sm"
-            disabled={!url}
-            onClick={handlePostVideo}
-          >
+          <Button type="button" size="sm" onClick={handlePostVideo}>
             {url ? "Update" : "Add"}
           </Button>
         </DialogFooter>
