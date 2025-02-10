@@ -19,6 +19,7 @@ interface EditState {
   setData: (update: Partial<EditState["data"]>) => void;
   addItem: (item: IEditMedia) => void;
   removeMedia: (_id: string) => void;
+  // itemsCount: () => number;
 }
 
 export const useEditStore = create<EditState>((set) => ({
@@ -26,7 +27,10 @@ export const useEditStore = create<EditState>((set) => ({
     items: [],
     text: "",
     isOrdered: true,
+    // count: this?.items?.length ?? 0,
   },
+
+  // itemsCount: (state: EditState) => state.data.items?.length ?? 0,
 
   setData: (update) =>
     set((state) => ({

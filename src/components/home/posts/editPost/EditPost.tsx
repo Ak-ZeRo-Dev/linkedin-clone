@@ -29,6 +29,12 @@ const EditPost = ({ post }: { post: IPostDocument }) => {
 
   const [isPending, startTransition] = useTransition();
 
+  const editImages: IEditMedia[] = images?.length
+    ? images.map((image) => ({ ...image, type: "image" }))
+    : [];
+
+  const editVideo: IEditMedia[] = video ? [{ ...video, type: "video" }] : [];
+
   const handleSubmit = (formData: FormData) => {
     startTransition(async () => {
       const toastId = toast.loading("Editing post...");
@@ -94,12 +100,6 @@ const EditPost = ({ post }: { post: IPostDocument }) => {
   };
 
   useEffect(() => {
-    const editImages: IEditMedia[] = images?.length
-      ? images.map((image) => ({ ...image, type: "image" }))
-      : [];
-
-    const editVideo: IEditMedia[] = video ? [{ ...video, type: "video" }] : [];
-
     setData({
       ...(text && { text }),
       items: [...editImages, ...editVideo].sort((a, b) => a.order - b.order),
@@ -124,7 +124,9 @@ const EditPost = ({ post }: { post: IPostDocument }) => {
               <PostText type="edit" />
               <PostImages type="edit" />
               <PostVideo type="edit" />
-              {data.items?.length ? <EditMedia /> : null}
+              {[...(images || []), ...(video ? [video] : [])].length ? (
+                <EditMedia images={editImages} video={editVideo} />
+              ) : null}
             </div>
 
             <Button

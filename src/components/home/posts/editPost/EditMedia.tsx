@@ -1,4 +1,4 @@
-import { useEditStore } from "@/store/postStore";
+import { IEditMedia, useEditStore } from "@/store/postStore";
 
 import { FolderCog, Grip } from "lucide-react";
 import Image from "next/image";
@@ -15,7 +15,13 @@ import {
 } from "../../../ui/dialog";
 import RemoveMedia from "./RemoveMedia";
 
-const EditMedia = () => {
+const EditMedia = ({
+  images,
+  video,
+}: {
+  images: IEditMedia[];
+  video: IEditMedia[];
+}) => {
   const { data, setData } = useEditStore();
 
   const [items, setItems] = useState(data.items);
@@ -57,18 +63,19 @@ const EditMedia = () => {
     closeRef.current?.click();
   };
 
-  useEffect(() => {
-    if (!items?.length) {
-      setItems(data.items);
-    }
-  }, [data, items]);
-
-  const handleOpen = () => {
-    setItems(data.items);
+  const handleUndo = () => {
+    setData({
+      items: [...images, ...video].sort((a, b) => a.order - b.order),
+      isOrdered: true,
+    });
   };
 
+  useEffect(() => {
+    setItems(data.items);
+  }, [data]);
+
   return (
-    <Dialog onOpenChange={handleOpen}>
+    <Dialog>
       <DialogTrigger asChild>
         <Button
           variant="ghost"
@@ -138,15 +145,21 @@ const EditMedia = () => {
             </div>
           ))}
         </div>
-        <DialogClose ref={closeRef} />
 
-        <Button
-          onClick={handleSave}
-          className="mx-auto mt-2 w-20 rounded-md"
-          disabled={data.isOrdered}
-        >
-          Save
-        </Button>
+        <div className="mt-2 flex items-center justify-center gap-3">
+          <DialogClose ref={closeRef} />
+          <Button onClick={handleUndo} disabled={data.isOrdered}>
+            Undo Changes
+          </Button>
+
+          <Button
+            onClick={handleSave}
+            className="w-20 rounded-md"
+            disabled={data.isOrdered}
+          >
+            Save
+          </Button>
+        </div>
       </DialogContent>
     </Dialog>
   );
